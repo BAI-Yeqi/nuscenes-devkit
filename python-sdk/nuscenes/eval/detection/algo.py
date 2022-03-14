@@ -102,8 +102,15 @@ def accumulate(gt_boxes: EvalBoxes,
 
             match_data['trans_err'].append(center_distance(gt_box_match, pred_box))
             match_data['vel_err'].append(velocity_l2(gt_box_match, pred_box))
-            match_data['scale_err'].append(1 - scale_iou(gt_box_match, pred_box))
-
+            
+            # match_data['scale_err'].append(1 - scale_iou(gt_box_match, pred_box))
+            try:
+                iou_val = scale_iou(gt_box_match, pred_box)
+            except Exception as e:
+                print('meet exception:', e, 'this exception is handled by zero filling')
+                iou_val = 0.0
+            match_data['scale_err'].append(1 - iou_val)
+            
             # Barrier orientation is only determined up to 180 degree. (For cones orientation is discarded later)
             period = np.pi if class_name == 'barrier' else 2 * np.pi
             match_data['orient_err'].append(yaw_diff(gt_box_match, pred_box, period=period))
